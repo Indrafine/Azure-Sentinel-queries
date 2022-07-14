@@ -1,0 +1,18 @@
+description: |
+  'Internal_scan_for ports 3389,22,445'
+  
+  
+tactics:
+  - Reconnaissance
+  
+  
+ CommonSecurityLog
+| where ipv4_is_private(DestinationIP)
+| where ipv4_is_in_range(SourceIP,"10.0.0.0/24") or ipv4_is_in_range(SourceIP,"192.168.0.0/24") // check if the source is from VPN (IP range) that executes the scan (also for another check => Destination IP of Domain Controller)
+| where DestinationPort in (445,3389,22)
+| summarize count() by SourceIP, DestinationIP, DestinationPort
+| summarize IPwithPort=makeset(strcat(DestinationIP,  ":", DestinationPort)), uniquePorts=makeset(DestinationPort) by SourceIP
+| extend numberOfConnections=array_length(IPwithPort)
+| order by numberOfConnections desc
+
+

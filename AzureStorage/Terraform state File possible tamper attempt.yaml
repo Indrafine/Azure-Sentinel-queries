@@ -1,0 +1,13 @@
+description: |
+  'This Usecase checks for any possible attempt to tamper the Terraform State File.'
+  
+  
+tactics:
+  - Initial Access 
+  
+StorageBlobLogs
+| where isnotempty(UserAgentHeader)
+| where UserAgentHeader !has "Terraform"
+| where Uri has "tfstate"
+| where OperationName !has "GetContainerProperties"
+//| where AuthenticationType !in ("AnonymousPreflight","SAS") uncomment if you want to monitor Anonymouspreflight and SAS

@@ -1,0 +1,19 @@
+// make sure to have the baseline from previous 14 days to create the threshold. In this example the threshold is given as 20000 based on the environmanet.Change as per required
+
+
+description: |
+  'This Usecase checks for any unusual increase of drops observed from the firewall logs. Established Baseline 20000 in a day.'
+
+tactics:
+  - Reconnaissance
+
+  
+query: |
+
+
+let timeFrame = ago(7d);
+CommonSecurityLog
+| where TimeGenerated >= timeFrame
+| where DeviceAction =~ "Drop" 
+| summarize count() by bin(TimeGenerated, 1d), DeviceAction
+| where count_ > 20000

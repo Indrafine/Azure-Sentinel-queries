@@ -1,0 +1,14 @@
+
+description: |
+'Detects when a root account is used for logins to a virtual machine. Administrator-level accounts should not be directly logged in, rather they should be elevated through a non-administrator account when needed.'  
+  
+tactics:
+  - Privilege Escalation
+
+
+Syslog
+| where SeverityLevel == "info" and ProcessName == "sshd" and (SyslogMessage contains "Failed" or SyslogMessage contains "Accepted")
+| where (SyslogMessage contains "root")
+| extend TargetUser = extract(@"(.*?)(\S+)(\s+from\s+)(\S+)(.+)", 2, SyslogMessage)  
+| extend SourceIP = extract(@"(.*?)(\S+)(\s+from\s+)(\S+)(.+)", 4, SyslogMessage)  
+| project TimeGenerated, Computer, HostIP, TargetUser, SourceIP, SyslogMessage

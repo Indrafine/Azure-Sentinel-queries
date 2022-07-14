@@ -1,0 +1,13 @@
+description: |
+  'Account created locally on the VM. Accounts should not be created local and should only be created through a directory service.'
+  
+  
+tactics:
+  - Persistence
+  
+Syslog
+| where SeverityLevel == "info" and ProcessName == "sshd" and (SyslogMessage contains "Failed" or SyslogMessage contains "Accepted")
+| where (SyslogMessage contains "root")
+| extend TargetUser = extract(@"(.*?)(\S+)(\s+from\s+)(\S+)(.+)", 2, SyslogMessage)  
+| extend SourceIP = extract(@"(.*?)(\S+)(\s+from\s+)(\S+)(.+)", 4, SyslogMessage)  
+| project TimeGenerated, Computer, HostIP, TargetUser, SourceIP, SyslogMessage

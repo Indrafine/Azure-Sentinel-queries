@@ -1,0 +1,23 @@
+description: |
+  'This rule triggers an alert when multiple connections observes from same source IP to destination Ips'
+tactics:
+  - Exfiltration
+  
+  
+  
+  
+CommonSecurityLog
+| where not(ipv4_is_private(SourceIP))// checking from remote public ip
+//| where ipv4_is_private(DestinationIP) // to internal local ip
+| where DeviceAction contains "Drop"
+| summarize dcount(DestinationPort), dcount(DestinationIP), make_set(DestinationPort) by SourceIP //DestinationIpsWithPorts=makeset(strcat(DestinationIP, ":", DestinationPort))
+| where dcount_DestinationPort > 1000 and dcount_DestinationIP > 9
+| join kind = inner (
+CommonSecurityLog
+| where not(ipv4_is_private(SourceIP))// checking from remote public ip
+//| where ipv4_is_private(DestinationIP) // to internal local ip
+| where DeviceAction contains "Accept"
+| summarize dcount(DestinationPort), dcount(DestinationIP), make_set(DestinationPort), make_set(DestinationIP) by SourceIP //DestinationIpsWithPorts=makeset(strcat(DestinationIP, ":", DestinationPort))
+//| where dcount_DestinationPort > 1000 and dcount_DestinationIP > 9
+) on SourceIP
+| project SourceIP1, DropCount_IP=dcount_DestinationIP, DropCount_Port=dcount_DestinationPort, AllowCount_IP=dcount_DestinationIP1, AllowCount_Port=dcount_DestinationPort1, AllowedIPs=set_DestinationIP, AllowedPort=set_DestinationPort1

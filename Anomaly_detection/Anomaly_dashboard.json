@@ -1,0 +1,2369 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1>All Anomalies Detection  </h1>"
+            },
+            "name": "text - 3"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let startdate = 31d;\r\nlet enddate = 1d;\r\nAnomalies\r\n| where TimeGenerated > ago(enddate)\r\n| summarize TodayCnt=count() by AnomalyTemplateName\r\n| join (Anomalies\r\n| where TimeGenerated > ago(startdate) and TimeGenerated < ago(enddate)\r\n| summarize  count() by bin(TimeGenerated, 1d), AnomalyTemplateName\r\n| summarize Maxcount=max(count_), Mincount= min(count_) by AnomalyTemplateName\r\n//| extend AvgCnt = round(avg_count_,2)\r\n) on AnomalyTemplateName\r\n//| extend AnomalyRatio = round(TodayCnt/AvgCnt,2)\r\n| extend AnomalyDetection = case(TodayCnt > Maxcount, \"Spike Detected\", TodayCnt < (Mincount*0.5),  \"Drop Detected\",\"No Detection\")\r\n| project AnomalyTemplateName,AnomalyDetection,TodayCnt, Maxcount,Mincount",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Anomaly Rule Spike and Drop Detection (based on 30 days data)",
+              "exportFieldName": "AnomalyTemplateName",
+              "exportParameterName": "Template",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Maxcount",
+                    "formatter": 0,
+                    "tooltipFormat": {
+                      "tooltip": "{TimeGenerated}"
+                    }
+                  },
+                  {
+                    "columnMatch": "AnomalyDetection",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Drop Detected",
+                          "representation": "yellow",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Spike Detected",
+                          "representation": "orange",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "No Detection",
+                          "representation": "gray",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "blue",
+                          "text": "{0}{1}"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_thresholds_AnomalyDetection_1",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_thresholds_AnomalyDetection_1",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "customWidth": "50",
+            "name": "query - 6",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Anomaly Detection Trend",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "a77334ac-122d-43c5-93fe-9f62e353fc72",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeSpan",
+                        "type": 4,
+                        "value": {
+                          "durationMs": 2592000000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 300000
+                            },
+                            {
+                              "durationMs": 900000
+                            },
+                            {
+                              "durationMs": 1800000
+                            },
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 14400000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            },
+                            {
+                              "durationMs": 5184000000
+                            },
+                            {
+                              "durationMs": 7776000000
+                            }
+                          ],
+                          "allowCustom": true
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces"
+                  },
+                  "customWidth": "30",
+                  "name": "parameters - 0"
+                },
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "<h3> {Template} </h3>"
+                  },
+                  "customWidth": "70",
+                  "name": "text - 2"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "Anomalies\r\n| where AnomalyTemplateName == '{Template}'\r\n| summarize count() by bin(TimeGenerated, 1d)",
+                    "size": 0,
+                    "aggregation": 2,
+                    "timeContextFromParameter": "TimeSpan",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "visualization": "timechart"
+                  },
+                  "name": "query - 1"
+                }
+              ]
+            },
+            "customWidth": "50",
+            "name": "group - 5",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "group - 10",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1> Attempted Bruteforce Anomalies Detection </h1>\r\n----------------------------"
+            },
+            "name": "text - 4"
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "bullets",
+              "links": [
+                {
+                  "id": "342ae019-e319-4359-b5ec-b74ea599fd81",
+                  "cellValue": "Click  username",
+                  "linkTarget": "OpenBlade",
+                  "linkLabel": "Documentation",
+                  "style": "link",
+                  "linkIsContextBlade": true
+                }
+              ]
+            },
+            "name": "links - 12"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "User Anomalies Detection Per day wise Trend",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "3a872268-5a4b-414b-b3d2-4a5798794a15",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeSpan",
+                        "type": 4,
+                        "value": {
+                          "durationMs": 2592000000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 300000
+                            },
+                            {
+                              "durationMs": 900000
+                            },
+                            {
+                              "durationMs": 1800000
+                            },
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 14400000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            },
+                            {
+                              "durationMs": 5184000000
+                            },
+                            {
+                              "durationMs": 7776000000
+                            }
+                          ],
+                          "allowCustom": true
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces"
+                  },
+                  "name": "parameters - 0"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "Anomalies\r\n| where AnomalyTemplateName contains \"bruteforce\"\r\n| extend AbnormalFailedCount = tostring(AnomalyReasons[0].Value)\r\n| extend Historic_counts_ = tostring(parse_json(tostring(AnomalyReasons[0].TypicalObservations)).[\"Historic counts\"])\r\n| where isnotempty(UserName)\r\n|extend User= tostring(split(UserName,\"\\\\\").[1])\r\n| summarize count() by bin(TimeGenerated, 1h), AnomalyTemplateName",
+                    "size": 0,
+                    "aggregation": 2,
+                    "color": "orange",
+                    "timeContextFromParameter": "TimeSpan",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "visualization": "unstackedbar",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "(Preview) Attempted user account bruteforce per logon type",
+                          "label": "Attempted user account bruteforce per logon type",
+                          "color": "green"
+                        },
+                        {
+                          "seriesName": "(Preview) Attempted user account bruteforce per failure reason",
+                          "label": "Attempted user account bruteforce per failure reason",
+                          "color": "grayBlue"
+                        },
+                        {
+                          "seriesName": "(Preview) Attempted user account bruteforce",
+                          "label": "Attempted user account bruteforce",
+                          "color": "orange"
+                        }
+                      ]
+                    }
+                  },
+                  "name": "query - 1"
+                }
+              ]
+            },
+            "name": "group - 9",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "3cf3fae8-fbdb-428e-87ae-ccf21d30fb0c",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Timerange",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 259200000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 0"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "Anomalies\r\n| where AnomalyTemplateName contains \"bruteforce\"\r\n| extend AbnormalFailedCount = tostring(AnomalyReasons[0].Value)\r\n| extend Historic_counts_ = tostring(parse_json(tostring(AnomalyReasons[0].TypicalObservations)).[\"Historic counts\"])\r\n| where isnotempty(UserName)\r\n|extend User= tostring(split(UserName,\"\\\\\").[1])\r\n| extend ExpectedCount = tostring(parse_json(tostring(parse_json(tostring(AnomalyDetails.Observables))[0].TypicalObservations)).[\"Expected count\"])\r\n| summarize make_set(strcat(TimeGenerated,\" :: \",Description)), make_set(AnomalyTemplateName) by TimeGenerated, UserName, User, AbnormalFailedCount, ExpectedCount, Historic_counts_, Score\r\n| extend des1 = tostring(set_[0])\r\n| extend des2 = tostring(set_[1])\r\n| extend des3 = tostring(set_[2])\r\n|join\r\n(SecurityEvent \r\n| summarize make_set(WorkstationName), make_set(IpAddress) by  Account)on $left.UserName== $right.Account\r\n| project TimeGenerated, UserName,AbnormalFailedCount,ExpectedCount,set_WorkstationName, set_IpAddress, User, Historic_counts_, Score, des1, des2, des3\r\n",
+              "size": 1,
+              "title": "User attempted bruteforce Anomalies Detected",
+              "timeContextFromParameter": "Timerange",
+              "exportedParameters": [
+                {
+                  "fieldName": "User",
+                  "parameterName": "SelectedUser",
+                  "defaultValue": ""
+                },
+                {
+                  "fieldName": "UserName",
+                  "parameterName": "SelectedUserName",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "TimeGenerated",
+                  "parameterName": "SelectedTimeGenerated",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "ExpectedCount",
+                  "parameterName": "SelectedExpectedCount",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "Score",
+                  "parameterName": "SelectedScore",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "Historic_counts_",
+                  "parameterName": "SelectedHistoricCount",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "des1",
+                  "parameterName": "Selecteddes1",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "des2",
+                  "parameterName": "Selecteddes2",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "des3",
+                  "parameterName": "Selecteddes3",
+                  "parameterType": 1
+                },
+                {
+                  "fieldName": "AbnormalFailedCount",
+                  "parameterName": "SelectedAbnormalFailedCount",
+                  "parameterType": 1
+                }
+              ],
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "UserName",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "contains",
+                          "thresholdValue": "\\",
+                          "representation": "gray",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": null,
+                          "text": "{0}{1}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "AbnormalFailedCount",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "palette": "red"
+                    }
+                  },
+                  {
+                    "columnMatch": "User",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "Historic_counts_",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "Score",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "des1",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "des2",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "des3",
+                    "formatter": 5
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_heatmap_AbnormalFailedCount_2",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_heatmap_AbnormalFailedCount_2",
+                  "sortOrder": 1
+                }
+              ]
+            },
+            "name": "query - 1",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "list",
+              "links": [
+                {
+                  "id": "c5fddd65-6057-4670-8f43-f4c06f60f0a0",
+                  "cellValue": "Details",
+                  "linkTarget": "parameter",
+                  "linkLabel": "Click here for More Details",
+                  "subTarget": "true",
+                  "style": "link"
+                }
+              ]
+            },
+            "name": "links - 6"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "fc40baf2-3890-4b19-9a0b-8b1eb109843d",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Details",
+                  "type": 1,
+                  "isGlobal": true,
+                  "value": "false",
+                  "isHiddenWhenLocked": true,
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 5"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "<h2 style=\"color:Black;\"><u>{SelectedUserName} </u></h2>\r\n\r\n<p style= \"font-size: 16px\"> Abnormal raise in failure count is being observed for the user **{SelectedUserName}** \r\n</p>\r\n</br>\r\n<p style= \"font-size: 16px\"> <u>**Failure Count Descripencies:**</u>\r\nAs per past log analysis failure count is expected as **{SelectedExpectedCount}**. But failure count is detected as **{SelectedAbnormalFailedCount}**. And Anamoly score is **{SelectedScore}**\r\n</p>\r\n</br>\r\n<p style= \"font-size: 16px\"> <u>**Historic Count:**</u>\r\n{SelectedHistoricCount}\r\n</p>\r\n<p style= \"font-size: 16px\"> <u>**Anomaly Destails Detected: **</u>\r\nBelow are the Details for Anomaly Detection on </p>\r\n<p style= \"font-size: 16px\">  {Selecteddes1} </p>\r\n<p style= \"font-size: 16px\">  {Selecteddes2} </p>\r\n<p style= \"font-size: 16px\">  {Selecteddes3} </p>\r\n"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "Details",
+                    "comparison": "isEqualTo",
+                    "value": "true"
+                  },
+                  "name": "text - 3"
+                },
+                {
+                  "type": 11,
+                  "content": {
+                    "version": "LinkItem/1.0",
+                    "style": "toolbar",
+                    "links": [
+                      {
+                        "id": "7e51ae2a-c57e-4375-8de8-2c0648e0f9a2",
+                        "cellValue": "Details",
+                        "linkTarget": "parameter",
+                        "linkLabel": "Back",
+                        "subTarget": "false",
+                        "style": "link",
+                        "icon": "StatusUpsell"
+                      }
+                    ]
+                  },
+                  "name": "links - 7"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "Details",
+              "comparison": "isEqualTo",
+              "value": "true"
+            },
+            "name": "group - 8"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "c036e990-edac-4759-8716-3ffe3dafada7",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "SetTime",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 1209600000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 8"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SecurityEvent\r\n| where EventID in (\"4625\", \"4624\")\r\n| where Account contains '{SelectedUser}'\r\n| summarize count() by bin(TimeGenerated, 1d), Activity\r\n//| summarize  count() by bin(TimeGenerated, 1d), Computer, Activity, IpAddress, WorkstationName, LogonTypeName, Account,TargetDomainName, TargetUserName, LogonProcessName, Status,SubStatus, FailureReason\r\n",
+              "size": 0,
+              "aggregation": 2,
+              "showAnalytics": true,
+              "title": " Authentication Failure &  Success Count Trend for User",
+              "color": "green",
+              "timeContextFromParameter": "SetTime",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "unstackedbar",
+              "tileSettings": {
+                "showBorder": false
+              },
+              "graphSettings": {
+                "type": 0
+              },
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "4624 - An account was successfully logged on.",
+                    "color": "green"
+                  },
+                  {
+                    "seriesName": "4625 - An account failed to log on.",
+                    "color": "red"
+                  }
+                ]
+              }
+            },
+            "customWidth": "50",
+            "name": "query - 2",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SecurityEvent\r\n| where Account contains '{SelectedUser}' or TargetUserName contains '{SelectedUser}'\r\n| summarize count() by Activity, WorkstationName\r\n| order by count_ desc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "All  Activities Detected for the User",
+              "timeContextFromParameter": "SetTime",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": {
+                  "columnMatch": "Activity",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "count_",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                },
+                "showBorder": true,
+                "size": "auto"
+              }
+            },
+            "customWidth": "50",
+            "name": "query - 7",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "<h2> Investigation & Response </h2>\r\n<p style= \"font-size: 16px\" >\r\n1. Check the Table and Click on the UserName to get Authentication Trend and Other activities for the selected User.</br>\r\n2. Check the trend and count for the selected User.</br>\r\n</p>\r\n\r\n"
+            },
+            "name": "text - 11"
+          }
+        ]
+      },
+      "name": "group - 3",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "\r\n\r\n-------------------------------------------"
+      },
+      "name": "text - 3"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "-------------------------------------------"
+      },
+      "name": "text - 3 - Copy"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1> Palo Alto Anomalies Detection </h1>"
+            },
+            "name": "text - 0"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "826208dd-ea29-43ab-b05f-a29b1eb21fdf",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeRange",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 604800000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "//let Deviceaction= dynamic([\"deny\",\"Blocked\",\"drop\",\"block-url\",\"drop-packet\",\"Drop\",\"IPS Drop\"]);\r\nlet startdate = 15d;\r\nlet enddate = 1d;\r\nCommonSecurityLog\r\n| where TimeGenerated > ago(enddate)\r\n| where DeviceProduct == \"PAN-OS\"\r\n//|where  DeviceAction in (Deviceaction)\r\n| summarize TodayCnt=count() by  DeviceAction\r\n| join (CommonSecurityLog\r\n| where TimeGenerated > ago(startdate) and TimeGenerated < ago(enddate)\r\n| where DeviceProduct == \"PAN-OS\"\r\n//|where  DeviceAction in (Deviceaction)\r\n| summarize  count() by bin(TimeGenerated, 1d), DeviceAction\r\n| summarize avg(count_) by DeviceAction\r\n) on DeviceAction\r\n| extend AvgCnt = round(avg_count_, 2)\r\n| extend AnomalyRatio = round(TodayCnt/AvgCnt,2)\r\n| extend AnomalyDetection = case(AnomalyRatio >2, \"Spike Detected\", AnomalyRatio < 0.5, \"Drop Detected\", \"No Anomaly\")\r\n| project TodayCnt, AvgCnt, DeviceAction, AnomalyRatio, AnomalyDetection\r\n",
+              "size": 0,
+              "showAnalytics": true,
+              "exportFieldName": "DeviceAction",
+              "exportParameterName": "Action",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "AnomalyRatio",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        {
+                          "operator": ">=",
+                          "thresholdValue": "2",
+                          "representation": "trendup",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "<=",
+                          "thresholdValue": "0.5",
+                          "representation": "trenddown",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "Line",
+                          "text": "{0}{1}"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "AnomalyDetection",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "contains",
+                          "thresholdValue": "Spike",
+                          "representation": "red",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "contains",
+                          "thresholdValue": "Drop",
+                          "representation": "orange",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "gray",
+                          "text": "{0}{1}"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "customWidth": "40",
+            "name": "query - 8",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "25342e67-42d3-45dd-ac9a-056f495c073b",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeSpan",
+                        "type": 4,
+                        "value": {
+                          "durationMs": 604800000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 300000
+                            },
+                            {
+                              "durationMs": 900000
+                            },
+                            {
+                              "durationMs": 1800000
+                            },
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 14400000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            },
+                            {
+                              "durationMs": 5184000000
+                            },
+                            {
+                              "durationMs": 7776000000
+                            }
+                          ],
+                          "allowCustom": true
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces"
+                  },
+                  "name": "parameters - 0"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "CommonSecurityLog\r\n| where DeviceProduct == \"PAN-OS\"\r\n| where isnotempty(DeviceAction)\r\n| where DeviceAction in (\"{Action}\")\r\n|summarize count() by bin(TimeGenerated, 1d)",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "timeContextFromParameter": "TimeSpan",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "visualization": "timechart"
+                  },
+                  "name": "query - 1"
+                }
+              ]
+            },
+            "customWidth": "60",
+            "name": "group - 9",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\r\n| where DeviceVendor contains \"palo\"\r\n| where isnotempty( IndicatorThreatType)\r\n| summarize count() by IndicatorThreatType, bin(TimeGenerated, 1h)\r\n\r\n",
+              "size": 0,
+              "aggregation": 2,
+              "title": "PaloAlto Anomalies Detection by ThreatType",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "areachart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "Botnet",
+                    "color": "grayBlue"
+                  }
+                ]
+              }
+            },
+            "name": "query - 2",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "1b0cfd3c-708a-4349-b07e-64ab4f8a1dc0",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeSpan",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 86400000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 6"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\r\n| where DeviceVendor contains \"palo\"\r\n| where DeviceAction in (\"deny\", \"drop\", \"drop-packet\")\r\n| where isnotempty( IndicatorThreatType)\r\n| where DeviceCustomString4 == \"outside\"\r\n| summarize count() by MaliciousIP\r\n| order by count_ desc\r\n| take 5\r\n\r\n",
+              "size": 0,
+              "title": "Top Inbound Malicious IP Hits",
+              "timeContextFromParameter": "TimeSpan",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "barchart"
+            },
+            "customWidth": "30",
+            "name": "query - 6",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\r\n| where DeviceVendor contains \"palo\"\r\n| where DeviceAction in (\"deny\", \"drop\", \"drop-packet\")\r\n| where isnotempty( IndicatorThreatType)\r\n| where DeviceCustomString4 == \"outside\"\r\n| summarize count() by MaliciousIP, MaliciousIPCountry,  ThreatConfidence, IndicatorThreatType\r\n| order by count_ desc\r\n| take 5\r\n",
+              "size": 0,
+              "title": "TOP 10 Inbound malicious IP Details",
+              "timeContextFromParameter": "TimeSpan",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "gridSettings": {
+                "labelSettings": [
+                  {
+                    "columnId": "ThreatConfidence",
+                    "label": "Score"
+                  },
+                  {
+                    "columnId": "IndicatorThreatType",
+                    "label": "Threat"
+                  }
+                ]
+              }
+            },
+            "customWidth": "35",
+            "name": "query - 7",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\r\n| where DeviceVendor contains \"palo\"\r\n| where DeviceAction in (\"deny\", \"drop\", \"drop-packet\")\r\n| where isnotempty( IndicatorThreatType)\r\n| where DeviceCustomString4 == \"outside\"\r\n| summarize count() by MaliciousIPCountry\r\n| order by count_ desc\r\n| take 20",
+              "size": 0,
+              "title": "Country Wise  Malicious IP Hits",
+              "timeContextFromParameter": "TimeSpan",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "map",
+              "mapSettings": {
+                "locInfo": "CountryRegion",
+                "locInfoColumn": "MaliciousIPCountry",
+                "latitude": "MaliciousIPLatitude",
+                "longitude": "MaliciousIPLongitude",
+                "sizeSettings": "count_",
+                "sizeAggregation": "Sum",
+                "labelSettings": "MaliciousIPCountry",
+                "legendMetric": "count_",
+                "legendAggregation": "Sum",
+                "itemColorSettings": {
+                  "nodeColorField": "count_",
+                  "colorAggregation": "Sum",
+                  "type": "heatmap",
+                  "heatmapPalette": "redGreen"
+                }
+              }
+            },
+            "customWidth": "35",
+            "name": "query - 7",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Palo Alto All Logs Trend",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "d27e0323-f10d-4bc8-9d2a-df6704b7df64",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Action",
+                        "type": 2,
+                        "multiSelect": true,
+                        "quote": "'",
+                        "delimiter": ",",
+                        "query": "CommonSecurityLog\r\n| where DeviceProduct == \"PAN-OS\"\r\n| where isnotempty(DeviceAction)\r\n| summarize by DeviceAction",
+                        "value": null,
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "showDefault": false
+                        },
+                        "timeContext": {
+                          "durationMs": 0
+                        },
+                        "timeContextFromParameter": "TimeRange",
+                        "queryType": 0,
+                        "resourceType": "microsoft.operationalinsights/workspaces"
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces"
+                  },
+                  "name": "Palo Alto All Logs Trend"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "CommonSecurityLog\r\n| where DeviceProduct == \"PAN-OS\"\r\n| where DeviceAction == \"All\" or DeviceAction in({Action})\r\n| where isnotempty(DeviceAction)\r\n| summarize count() by bin(TimeGenerated, 1h), DeviceAction",
+                    "size": 0,
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "visualization": "timechart"
+                  },
+                  "name": "query - 9",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "group - 11"
+          }
+        ]
+      },
+      "name": "group - 1",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "\r\n-----------------------------"
+      },
+      "name": "text - 7"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1>Zscaler Anomalies Detection</h1>"
+            },
+            "name": "text - 0"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "316c2c71-2973-49f9-bce6-ea432bee2f9d",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Timerange",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 604800000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 1"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "854f8779-aec4-4a96-9102-4a8f07fd3206",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "URLType",
+                  "type": 2,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "query": "CommonSecurityLog\r\n| where DeviceVendor == \"Zscaler\"\r\n| where DeviceAction == \"Blocked\"\r\n| summarize by DeviceCustomString2",
+                  "value": [
+                    "Suspicious Destination",
+                    "Phishing"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 0
+                  },
+                  "timeContextFromParameter": "Timerange",
+                  "queryType": 0,
+                  "resourceType": "microsoft.operationalinsights/workspaces"
+                },
+                {
+                  "id": "37959b7d-355d-4f06-8b7a-2472507bdd2f",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "Action",
+                  "type": 2,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "query": "CommonSecurityLog\r\n| where DeviceVendor == \"Zscaler\"\r\n| where DeviceAction in (\"Allowed\", \"Blocked\")\r\n| summarize by  DeviceAction",
+                  "value": [
+                    "value::all"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ]
+                  },
+                  "timeContext": {
+                    "durationMs": 604800000
+                  },
+                  "queryType": 0,
+                  "resourceType": "microsoft.operationalinsights/workspaces"
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 4"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\r\n| where DeviceVendor == \"Zscaler\"\r\n| where  \"{Action:label}\" == \"All\" or DeviceAction in ({Action})\r\n| where  \"{URLType:label}\" == \"All\" or DeviceCustomString2 in ({URLType})\r\n| summarize count() by URLcat = DeviceCustomString2, DeviceAction, bin(TimeGenerated, 1h)\r\n| order by count_ desc",
+              "size": 0,
+              "aggregation": 3,
+              "showAnalytics": true,
+              "title": "URL Category Wise  Traffic Trend",
+              "timeContextFromParameter": "Timerange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "areachart"
+            },
+            "name": "query - 2"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "7415ff79-2e2f-4fa7-aded-ec145ef21425",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeSpan",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 86400000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 5"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "CommonSecurityLog\r\n| where DeviceProduct == \"NSSWeblog\"\r\n| where  \"{Action:label}\" == \"All\" or DeviceAction in ({Action})\r\n| where DeviceCustomString2 in ({URLType})\r\n| summarize make_set(RequestContext), dcount(SourceUserName),count() by  DestinationHostName, URLCategory= DeviceCustomString2, DeviceAction\r\n| top 20 by count_\r\n| join  kind= leftouter ( \r\n_GetWatchlist('CrowdStrike_High_Domain') ) on $left.DestinationHostName == $right.indicator\r\n| project DestinationHostName, DeviceAction, URLCategory,malicious_confidence, malware_families, SUserCnt=dcount_SourceUserName, count_",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Top Domains  Hits on Zscaler",
+              "timeContextFromParameter": "TimeSpan",
+              "exportFieldName": "DestinationHostName",
+              "exportParameterName": "Host",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "gridSettings": {
+                "sortBy": [
+                  {
+                    "itemKey": "count_",
+                    "sortOrder": 2
+                  }
+                ],
+                "labelSettings": [
+                  {
+                    "columnId": "malicious_confidence",
+                    "label": "CS_Confidence"
+                  },
+                  {
+                    "columnId": "malware_families",
+                    "label": "CS_Malware_Families"
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "count_",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "customWidth": "80",
+            "name": "query - 3",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "bullets",
+              "links": [
+                {
+                  "id": "22e9ecee-cc5d-4d27-a33a-3bbac3414d5c",
+                  "cellValue": "https://www.virustotal.com/gui/domain/{Host}",
+                  "linkTarget": "Url",
+                  "linkLabel": "VirusTotal  Domain  Check",
+                  "preText": "",
+                  "style": "link"
+                },
+                {
+                  "id": "2f41d58d-1217-46f8-832f-a9bbfa931656",
+                  "cellValue": "https://www.virustotal.com/gui/ip-address/{Host}",
+                  "linkTarget": "Url",
+                  "linkLabel": "VirusTotal IP Check",
+                  "style": "link"
+                }
+              ]
+            },
+            "customWidth": "20",
+            "name": "links - 7",
+            "styleSettings": {
+              "margin": "32px",
+              "padding": "32px"
+            }
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "bullets",
+              "links": []
+            },
+            "name": "links - 6"
+          }
+        ]
+      },
+      "name": "group - 6",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1> Email Events Anomaly Detection </h1>"
+            },
+            "name": "text - 2"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "ee70bf00-b4ec-421d-86e4-ffc7688f978a",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeRange",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 1209600000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 9"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "EmailEvents\r\n| extend EmailDeliveryAction = strcat ( DeliveryLocation, \" - \", DeliveryAction) \r\n| summarize count() by  EmailDeliveryAction\r\n| where EmailDeliveryAction !contains \"Unknown\"",
+              "size": 4,
+              "aggregation": 2,
+              "title": "Email Delivery Action",
+              "timeContextFromParameter": "TimeRange",
+              "exportedParameters": [
+                {
+                  "fieldName": "EmailDeliveryAction",
+                  "parameterName": "PickEmailDeliveryAction",
+                  "parameterType": 5
+                }
+              ],
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": {
+                  "columnMatch": "EmailDeliveryAction",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "count_",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                },
+                "showBorder": true,
+                "size": "auto"
+              }
+            },
+            "name": "query - 9"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "EmailEvents\r\n| extend EmailDeliveryAction = strcat ( DeliveryLocation, \" - \", DeliveryAction) \r\n| where EmailDeliveryAction =='{PickEmailDeliveryAction}'\r\n| summarize count() by bin(TimeGenerated, 4h)",
+              "size": 0,
+              "aggregation": 2,
+              "title": "Email Delivery Action Trend",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "timechart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "count_",
+                    "color": "red"
+                  }
+                ]
+              }
+            },
+            "customWidth": "40",
+            "name": "query - 3",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "EmailEvents\r\n| where EmailDirection == \"Inbound\"\r\n| extend EmailDeliveryAction = strcat ( DeliveryLocation, \" - \", DeliveryAction)\r\n| where EmailDeliveryAction == '{PickEmailDeliveryAction}' \r\n| summarize dCnt_Recipient=dcount(RecipientEmailAddress),dCnt_Sub=dcount(Subject),  count() by SenderFromAddress, EmailDeliveryAction\r\n| order by count_ desc\r\n| take 20\r\n\r\n",
+              "size": 0,
+              "title": "Dellivery Action Wise TOP Sender Details for Inbound Email",
+              "timeContext": {
+                "durationMs": 86400000
+              },
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "60",
+            "name": "query - 4",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let domain= dynamic([\"vistracorp.com\",\"ambitenergy.com\",\"AMBITENERGY.COM\",\"txu.onmicrosoft.com\",\"txu.com\",\"vistraenergy.com\",\"txuer.net\",\r\n\"luminant.com\",\"Luminant.com\",\"criusenergy.com\",\"AmbitEnergyInc.onmicrosoft.com\",\"TXU.com\",\"dynegy.com\",\"tceh.net\",\"site24x7.com\",\"service-now.com\",\"box.com\", \"microsoft.com\"]);\r\nEmailEvents\r\n|where SenderFromDomain !in (domain)\r\n|where isnotempty( SenderFromAddress)\r\n|where RecipientEmailAddress has_any(domain)\r\n|summarize  count()by SenderFromAddress, RecipientEmailAddress, EmailActionPolicy,EmailAction, DeliveryAction, DeliveryLocation, AttachmentCount\r\n|where count_ >100\r\n|order by count_",
+              "size": 0,
+              "title": "More than 100 mails from same external Sender to Recipient",
+              "timeContext": {
+                "durationMs": 86400000
+              },
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "DeliveryAction",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Blocked",
+                          "representation": "redBright",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Delivered",
+                          "representation": "green",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Junked",
+                          "representation": "orange",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "blue",
+                          "text": "{0}{1}"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_thresholds_DeliveryAction_4",
+                    "sortOrder": 1
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_thresholds_DeliveryAction_4",
+                  "sortOrder": 1
+                }
+              ]
+            },
+            "name": "query - 5",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "group - 11",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "----------------------"
+      },
+      "name": "text - 9"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1> Suspicious User Login Detection </h1>"
+            },
+            "name": "text - 0"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "6417a495-84b6-4902-a37d-f4fe209f8436",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeRange",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 1209600000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "Anomalies\r\n| where AnomalyTemplateName == \"(Preview) Suspicious volume of logins to user account\"\r\n| summarize count() by bin(TimeGenerated, 1d)\r\n",
+              "size": 0,
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "areachart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "count_",
+                    "color": "magenta"
+                  }
+                ]
+              }
+            },
+            "name": "query - 2"
+          }
+        ]
+      },
+      "name": "group - 2",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h2 style=\"color:Blue;\"> Risky Users </h2>"
+            },
+            "name": "text - 3"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "<h3 style=\"color:Green;\">Description</h3> \r\nIdentity Protection uses the learnings Microsoft has acquired from their position in organizations with Azure AD, the consumer space with Microsoft Accounts. <br> Risk detections in Azure AD Identity Protection include any identified suspicious actions related to user accounts in the directory. <br>\r\n\r\nIdentity Protection identifies risks of many types, including:<br>\r\n•\tAnonymous IP address use<br>\r\n•\tAtypical travel<br>\r\n•\tMalware linked IP address<br>\r\n•\tUnfamiliar sign-in properties<br>\r\n•\tLeaked credentials<br>\r\n•\tPassword spray….<br>\r\n\r\n"
+            },
+            "name": "text - 2"
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "nav",
+              "links": [
+                {
+                  "id": "b97be72b-a3ce-40c0-856d-1bdbcf940db7",
+                  "cellValue": "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/concept-identity-protection-risks",
+                  "linkTarget": "Url",
+                  "linkLabel": "Click Here",
+                  "preText": "For more details",
+                  "style": "link"
+                }
+              ]
+            },
+            "name": "links - 5"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "86ea4714-dda5-4c25-8f54-f211cdb2766c",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TimeFrame",
+                  "type": 4,
+                  "value": {
+                    "durationMs": 86400000
+                  },
+                  "typeSettings": {
+                    "selectableValues": [
+                      {
+                        "durationMs": 300000
+                      },
+                      {
+                        "durationMs": 900000
+                      },
+                      {
+                        "durationMs": 1800000
+                      },
+                      {
+                        "durationMs": 3600000
+                      },
+                      {
+                        "durationMs": 14400000
+                      },
+                      {
+                        "durationMs": 43200000
+                      },
+                      {
+                        "durationMs": 86400000
+                      },
+                      {
+                        "durationMs": 172800000
+                      },
+                      {
+                        "durationMs": 259200000
+                      },
+                      {
+                        "durationMs": 604800000
+                      },
+                      {
+                        "durationMs": 1209600000
+                      },
+                      {
+                        "durationMs": 2419200000
+                      },
+                      {
+                        "durationMs": 2592000000
+                      },
+                      {
+                        "durationMs": 5184000000
+                      },
+                      {
+                        "durationMs": 7776000000
+                      }
+                    ],
+                    "allowCustom": true
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  }
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 1"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AADUserRiskEvents\r\n|join \r\nAADRiskyUsers on $left.UserDisplayName== $right.UserDisplayName\r\n|summarize by UserPrincipalName, OperationName1, IpAddress, RiskDetail,  RiskLevel,  RiskState, tostring(Location),Activity,tostring(AdditionalInfo), RiskEventType",
+              "size": 0,
+              "timeContextFromParameter": "TimeFrame",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "UserPrincipalName",
+                    "formatter": 7,
+                    "formatOptions": {
+                      "linkTarget": "GenericDetails",
+                      "linkIsContextBlade": true
+                    }
+                  },
+                  {
+                    "columnMatch": "OperationName1",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "IpAddress",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "RiskDetail",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "RiskState",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "Location",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "Activity",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "AdditionalInfo",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "RiskEventType",
+                    "formatter": 5
+                  }
+                ]
+              }
+            },
+            "customWidth": "50",
+            "name": "query - 10",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "group - 11",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "<h1> Sentinel Incidents Spike and Detections </h1>"
+            },
+            "name": "text - 3"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let timeframe= 15d;\r\nSecurityIncident\r\n| where Status == \"New\"\r\n|where TimeGenerated >= ago(timeframe)\r\n|summarize arg_max(TimeGenerated,*) by IncidentNumber\r\n|summarize  count() by bin(TimeGenerated,1d)",
+              "size": 0,
+              "aggregation": 2,
+              "title": "Incident Spike in Sentinel",
+              "color": "turquoise",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "barchart"
+            },
+            "customWidth": "60",
+            "name": "query - 11",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let startdate = 15d;\r\nlet enddate = 1d;\r\nSecurityIncident\r\n| where TimeGenerated > ago(enddate)\r\n|where Status == \"New\"\r\n|summarize arg_max(TimeGenerated,*) by IncidentNumber\r\n|summarize TodayCnt=count() by Title\r\n| join (SecurityIncident\r\n| where TimeGenerated > ago(startdate) and TimeGenerated < ago(enddate)\r\n| where Status == \"New\"\r\n| summarize arg_max(TimeGenerated,*) by IncidentNumber\r\n| summarize  count() by bin(TimeGenerated, 1d), Title\r\n| summarize Maxcount=max(count_), Mincount= min(count_) by Title\r\n) on Title\r\n| extend AnomalyDetection = case(TodayCnt > Maxcount, \"Spike Detected\", TodayCnt < (Mincount*0.5),  \"Drop Detected\",\"No Detection\")\r\n| project Title, AnomalyDetection,TodayCnt, Maxcount, Mincount ",
+              "size": 0,
+              "title": "Sentinel  Incident Detection",
+              "exportFieldName": "Title",
+              "exportParameterName": "rulename",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "AnomalyDetection",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "==",
+                          "thresholdValue": "No Detection",
+                          "representation": "gray",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Spike Detected",
+                          "representation": "red",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "Drop Detected",
+                          "representation": "orange",
+                          "text": "{0}{1}"
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "blue",
+                          "text": "{0}{1}"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "customWidth": "50",
+            "name": "query - 12",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let timeframe= 15d;\r\nSecurityIncident\r\n| where Status == \"New\"\r\n|where TimeGenerated >= ago(timeframe)\r\n|where Title == '{rulename}'\r\n|summarize arg_max(TimeGenerated,*) by IncidentNumber\r\n|summarize  count() by bin(TimeGenerated,1d)",
+              "size": 0,
+              "aggregation": 2,
+              "title": "Incident Detection Trend",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "visualization": "linechart"
+            },
+            "customWidth": "50",
+            "name": "query - 12",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "group - 13",
+      "styleSettings": {
+        "showBorder": true
+      }
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/4eada9a4-398a-483e-bdf9-6eeba9185f22/resourcegroups/rg-cyber-sentinel-prod/providers/microsoft.operationalinsights/workspaces/ws-cyber-prod"
+  ],
+  "fromTemplateId": "sentinel-UserWorkbook",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

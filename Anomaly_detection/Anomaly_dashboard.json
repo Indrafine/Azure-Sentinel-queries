@@ -22,7 +22,7 @@
               "links": [
                 {
                   "id": "e655ee3b-7a2b-4c3b-b5ce-71e95838ad25",
-                  "cellValue": "https://ts.accenture.com/sites/KDC-NA-KDC-NA-1C/_layouts/15/Doc.aspx?sourcedoc={2c430dc7-b9f8-4450-b24b-640987775a9e}&action=edit&wd=target%28All%20Anomalies%20Detection.one%7C551f6c57-429e-46b8-93b5-b445dd925f80%2F%29&wdorigin=717",
+                  "cellValue": "",
                   "linkTarget": "Url",
                   "linkLabel": "Click Here to Add Analysis",
                   "style": "link"
@@ -266,7 +266,7 @@
               "links": [
                 {
                   "id": "342ae019-e319-4359-b5ec-b74ea599fd81",
-                  "cellValue": "https://ts.accenture.com/:w:/r/sites/KDC-NA-KDC-NA-1C/_layouts/15/Doc.aspx?sourcedoc=%7B354d74ab-83b0-43d9-85b3-f5ba18b8e3c3%7D&action=edit&wdPid=25341cb0",
+                  "cellValue": "",
                   "linkTarget": "Url",
                   "linkLabel": "Documentation",
                   "style": "link",
